@@ -1,0 +1,103 @@
+<?php
+
+namespace App\Http\Controllers\Api\V1;
+
+use App\Exceptions\BusinessException;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreInvoiceRequest;
+use App\Http\Requests\StorePaymentRequest;
+use App\Http\Requests\UpdateInvoiceRequest;
+use App\Http\Resources\InvoiceResource;
+use App\Http\Resources\PaymentResource;
+use App\Models\Invoice;
+use App\Services\InvoiceService;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Response;
+
+class InvoiceController extends Controller
+{
+    public function __construct(private readonly InvoiceService $invoices) {}
+
+    public function index(Request $request): AnonymousResourceCollection
+    {
+        $query = Invoice::query()
+            ->with(['client:id,name,code'])
+            ->search($request->query('search'))
+            ->status($request->query('status'));
+
+        if ($request->filled('client_id')) {
+            $query->where('client_id', $request->integer('client_id'));
+        }
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->query('type'));
+        }
+
+        if ($request->boolean('outstanding')) {
+            $query->outstanding();
+        }
+
+        if ($request->filled('from')) {
+            $query->whereDate('issue_date', '>=', $request->query('from'));
+        }
+
+        if ($request->filled('to')) {
+            $query->whereDate('issue_date', '<=', $request->query('to'));
+        }
+
+        return InvoiceResource::collection($query->orderByDesc('id')->paginate($this->perPage($request)));
+    }
+
+    public function store(StoreInvoiceRequest $request): InvoiceResource
+    {
+        $invoice = $this->invoices->create($request->validated(), $request->user());
+
+        return new InvoiceResource($invoice);
+    }
+
+    public function show(Invoice $invoice): InvoiceResource
+    {
+        return new InvoiceResource(
+            $invoice->load(['client', 'salesOrder', 'lines.product', 'payments.creator', 'creator'])
+        );
+    }
+
+    public function update(UpdateInvoiceRequest $request, Invoice $invoice): InvoiceResource
+    {
+        return new InvoiceResource($this->invoices->update($invoice, $request->validated()));
+    }
+
+    public function destroy(Invoice $invoice): Response
+    {
+        if (! $invoice->status->isEditable()) {
+            throw new BusinessException('Seule une facture en brouillon peut être supprimée.');
+        }
+
+        $invoice->delete();
+
+        return response()->noContent();
+    }
+
+    public function send(Invoice $invoice): InvoiceResource
+    {
+        return new InvoiceResource($this->invoices->send($invoice));
+    }
+
+    public function cancel(Invoice $invoice): InvoiceResource
+    {
+        return new InvoiceResource($this->invoices->cancel($invoice));
+    }
+
+    public function storePayment(StorePaymentRequest $request, Invoice $invoice): PaymentResource
+    {
+        $payment = $this->invoices->recordPayment($invoice, $request->validated(), $request->user());
+
+        return new PaymentResource($payment);
+    }
+
+    private function perPage(Request $request): int
+    {
+        return min(max($request->integer('per_page', 15), 1), 100);
+    }
+}
