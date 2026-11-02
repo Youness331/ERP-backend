@@ -1,0 +1,14 @@
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Node / Angular (frontend, later)
+node_modules/
+dist/
+.angular/
+
+# Logs
+*.log
