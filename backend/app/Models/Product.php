@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Searchable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, Searchable, SoftDeletes;
 
     protected $fillable = [
         'sku', 'barcode', 'name', 'description', 'category_id', 'unit',
@@ -57,19 +58,12 @@ class Product extends Model
         return $query->where('is_active', true);
     }
 
-    public function scopeSearch(Builder $query, ?string $term): Builder
+    /**
+     * @return list<string>
+     */
+    protected function searchableColumns(): array
     {
-        if (blank($term)) {
-            return $query;
-        }
-
-        $like = '%'.$term.'%';
-
-        return $query->where(function (Builder $q) use ($like) {
-            $q->where('name', 'like', $like)
-                ->orWhere('sku', 'like', $like)
-                ->orWhere('barcode', 'like', $like);
-        });
+        return ['name', 'sku', 'barcode'];
     }
 
     /**
