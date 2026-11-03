@@ -16,7 +16,7 @@ class PermissionsTest extends TestCase
         }
 
         $this->assertSame($expected, count(Permissions::definitions()));
-        $this->assertSame(47, count(Permissions::definitions()));
+        $this->assertSame(53, count(Permissions::definitions()));
     }
 
     public function test_permission_names_are_unique(): void

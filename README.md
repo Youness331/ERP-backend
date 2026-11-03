@@ -34,7 +34,7 @@ stock, achats, ventes, facturation, encaissements) pour une PME marocaine :
 | Authentification | Laravel Sanctum (tokens Bearer) |
 | Serveur web | Nginx + PHP-FPM |
 | Conteneurisation | Docker Compose |
-| Tests | PHPUnit 11 (138 tests, 494 assertions) |
+| Tests | PHPUnit 11 (148 tests, 560 assertions) |
 | Style | Laravel Pint (PSR-12) |
 
 ## Architecture
@@ -57,7 +57,7 @@ HTTP → Controller (mince) → FormRequest (validation) → Service (règles m�
 | Module | Fonctionnalités |
 | --- | --- |
 | **Authentification** | Login token, profil, changement de mot de passe, déconnexion, comptes désactivables |
-| **Rôles & permissions** | 5 rôles, 47 permissions granulaires, matrice consultable |
+| **Rôles & permissions** | 5 rôles, 53 permissions granulaires, matrice consultable |
 | **Clients** | CRUD, recherche, pagination, champs fiscaux marocains (ICE, IF, RC, patente), limite de crédit |
 | **Fournisseurs** | CRUD, recherche, contacts |
 | **Catalogue** | Catégories hiérarchiques, produits (SKU, code-barres, TVA, seuil de réapprovisionnement, stock initial) |
@@ -65,6 +65,7 @@ HTTP → Controller (mince) → FormRequest (validation) → Service (règles m�
 | **Stock** | Niveaux par entrepôt, quantité réservée/disponible, entrées/sorties/ajustements, **journal immuable** |
 | **Achats** | Commandes fournisseurs, confirmation, réception totale/partielle, coût moyen pondéré |
 | **Ventes** | Commandes clients, confirmation (réservation), livraison totale/partielle, annulation |
+| **Devis** | Brouillon → envoyé → accepté/refusé → conversion en commande, validité automatique, expiration planifiée |
 | **Facturation** | Factures & avoirs, envoi, annulation, génération depuis une commande livrée |
 | **Paiements** | Encaissements partiels/totaux, statuts automatiques, détection des retards |
 | **Tableau de bord** | CA du mois (+ croissance), encaissements, créances, retards, stock faible, valeur du stock, top produits, série 12 mois |
@@ -155,7 +156,7 @@ cd backend && php artisan test
 Tests unitaires (logique pure, sans base de données) :
 
 - `LineTotalsTest` — arrondis des totaux de ligne, TVA, remises, document vide
-- `PermissionsTest` — unicité et nommage des 47 permissions du catalogue RBAC
+- `PermissionsTest` — unicité et nommage des 53 permissions du catalogue RBAC
 - `SalesOrderStatusTest`, `PurchaseOrderStatusTest`, `InvoiceStatusTest`,
   `InvoiceTypeTest`, `StockMovementTypeTest` — libellés et transitions de statut
 
@@ -200,7 +201,7 @@ Tests fonctionnels :
 │   │   ├── migrations/       # 10 migrations métier
 │   │   └── seeders/
 │   ├── routes/api.php
-│   └── tests/                # 138 tests (unit + feature)
+│   └── tests/                # 148 tests (unit + feature)
 ├── docker/                   # PHP-FPM, Nginx, php.ini
 ├── docker-compose.yml
 ├── docs/API.md

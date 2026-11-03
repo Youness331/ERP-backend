@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\InvoiceController;
 use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\PurchaseOrderController;
+use App\Http\Controllers\Api\V1\QuoteController;
 use App\Http\Controllers\Api\V1\RoleController;
 use App\Http\Controllers\Api\V1\SalesOrderController;
 use App\Http\Controllers\Api\V1\StockController;
@@ -132,6 +133,23 @@ Route::prefix('v1')->group(function () {
             Route::post('{salesOrder}/deliver', [SalesOrderController::class, 'deliver'])->middleware('permission:sales_orders.deliver');
             Route::post('{salesOrder}/cancel', [SalesOrderController::class, 'cancel'])->middleware('permission:sales_orders.update');
             Route::post('{salesOrder}/invoice', [SalesOrderController::class, 'invoice'])->middleware('permission:invoices.create');
+        });
+
+        /*
+        |--------------------------------------------------------------------
+        | Quotes
+        |--------------------------------------------------------------------
+        */
+        Route::prefix('quotes')->group(function () {
+            Route::get('/', [QuoteController::class, 'index'])->middleware('permission:quotes.view');
+            Route::post('/', [QuoteController::class, 'store'])->middleware('permission:quotes.create');
+            Route::get('{quote}', [QuoteController::class, 'show'])->middleware('permission:quotes.view');
+            Route::match(['put', 'patch'], '{quote}', [QuoteController::class, 'update'])->middleware('permission:quotes.update');
+            Route::delete('{quote}', [QuoteController::class, 'destroy'])->middleware('permission:quotes.delete');
+            Route::post('{quote}/send', [QuoteController::class, 'send'])->middleware('permission:quotes.send');
+            Route::post('{quote}/accept', [QuoteController::class, 'accept'])->middleware('permission:quotes.update');
+            Route::post('{quote}/reject', [QuoteController::class, 'reject'])->middleware('permission:quotes.update');
+            Route::post('{quote}/convert', [QuoteController::class, 'convert'])->middleware('permission:quotes.convert');
         });
 
         /*

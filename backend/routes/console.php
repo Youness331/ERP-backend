@@ -1,6 +1,7 @@
 <?php
 
 use App\Services\InvoiceService;
+use App\Services\QuoteService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -18,3 +19,13 @@ Artisan::command('erp:refresh-overdue-invoices', function (InvoiceService $invoi
 })->purpose('Flag unpaid invoices that passed their due date');
 
 Schedule::command('erp:refresh-overdue-invoices')->dailyAt('01:00');
+
+Artisan::command('erp:expire-quotes', function (QuoteService $quotes) {
+    $expired = $quotes->expireOutdated();
+
+    $this->info(sprintf('%d devis marqué(s) expiré(s).', $expired));
+
+    return self::SUCCESS;
+})->purpose('Expire quotes past their validity date');
+
+Schedule::command('erp:expire-quotes')->dailyAt('01:15');

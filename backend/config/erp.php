@@ -30,6 +30,11 @@ return [
         'default_rate' => (float) env('ERP_DEFAULT_TAX_RATE', 20),
     ],
 
+    'quote' => [
+        // Default validity window applied to a new quote.
+        'valid_days' => (int) env('ERP_QUOTE_VALID_DAYS', 30),
+    ],
+
     'invoice' => [
         'due_days' => (int) env('ERP_INVOICE_DUE_DAYS', 30),
     ],
