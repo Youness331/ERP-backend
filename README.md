@@ -34,7 +34,7 @@ stock, achats, ventes, facturation, encaissements) pour une PME marocaine :
 | Authentification | Laravel Sanctum (tokens Bearer) |
 | Serveur web | Nginx + PHP-FPM |
 | Conteneurisation | Docker Compose |
-| Tests | PHPUnit 11 (166 tests, 642 assertions) |
+| Tests | PHPUnit 11 (171 tests, 654 assertions) |
 | Style | Laravel Pint (PSR-12) |
 
 ## Architecture
@@ -66,7 +66,7 @@ HTTP → Controller (mince) → FormRequest (validation) → Service (règles m�
 | **Achats** | Commandes fournisseurs, confirmation, réception totale/partielle, coût moyen pondéré |
 | **Ventes** | Commandes clients, confirmation (réservation), livraison totale/partielle, annulation |
 | **Devis** | Brouillon → envoyé → accepté/refusé → conversion en commande, validité automatique, expiration planifiée |
-| **Facturation** | Factures & avoirs, envoi, annulation, génération depuis une commande livrée |
+| **Facturation** | Factures & avoirs, envoi, annulation, génération depuis une commande livrée, export PDF |
 | **Paiements** | Encaissements clients et décaissements fournisseurs, partiels ou totaux, statuts automatiques, détection des retards |
 | **Journal d'activité** | Traçabilité des créations, modifications et suppressions : auteur, IP et champs modifiés |
 | **Rapports** | Ventes par période, top produits/clients, dépenses fournisseurs, valorisation du stock, balance âgée |
@@ -203,7 +203,7 @@ Tests fonctionnels :
 │   │   ├── migrations/       # 10 migrations métier
 │   │   └── seeders/
 │   ├── routes/api.php
-│   └── tests/                # 166 tests (unit + feature)
+│   └── tests/                # 171 tests (unit + feature)
 ├── docker/                   # PHP-FPM, Nginx, php.ini
 ├── docker-compose.yml
 ├── docs/API.md
@@ -213,7 +213,6 @@ Tests fonctionnels :
 ## Prochaines étapes
 
 - [ ] Frontend Angular (dashboard, listes, formulaires, guards par permission)
-- [ ] Export PDF des factures / bons de livraison
 - [ ] Rapprochement bancaire des décaissements
 - [ ] Avoirs générés depuis une facture
 - [ ] Notifications (email facture, alerte stock) via queue Redis
