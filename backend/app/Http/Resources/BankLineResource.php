@@ -2,10 +2,11 @@
 
 namespace App\Http\Resources;
 
+use App\Models\BankStatementLine;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/** @mixin \App\Models\BankStatementLine */
+/** @mixin BankStatementLine */
 class BankLineResource extends JsonResource
 {
     public function toArray(Request $request): array

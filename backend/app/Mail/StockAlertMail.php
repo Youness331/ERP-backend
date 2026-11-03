@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Models\Product;
 use Illuminate\Bus\Queueable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Mail\Mailable;
@@ -14,7 +15,7 @@ class StockAlertMail extends Mailable
     use Queueable, SerializesModels;
 
     /**
-     * @param  Collection<int, \App\Models\Product>  $products
+     * @param  Collection<int, Product>  $products
      */
     public function __construct(
         public readonly Collection $products,
