@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Exceptions\BusinessException;
 use App\Exceptions\InsufficientStockException;
 use App\Models\Product;
 use App\Models\Stock;
@@ -141,7 +142,7 @@ class StockServiceTest extends TestCase
 
     public function test_a_zero_quantity_is_rejected(): void
     {
-        $this->expectException(\App\Exceptions\BusinessException::class);
+        $this->expectException(BusinessException::class);
 
         $this->stock->increase($this->product, $this->warehouse, 0);
     }

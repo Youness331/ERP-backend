@@ -2,10 +2,11 @@
 
 namespace App\Http\Resources;
 
+use App\Models\QuoteLine;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/** @mixin \App\Models\QuoteLine */
+/** @mixin QuoteLine */
 class QuoteLineResource extends JsonResource
 {
     public function toArray(Request $request): array

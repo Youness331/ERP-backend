@@ -6,6 +6,7 @@ use App\Models\Client;
 use App\Models\Product;
 use App\Models\SalesOrder;
 use App\Models\SalesOrderLine;
+use App\Models\Warehouse;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\InteractsWithErp;
 use Tests\TestCase;
@@ -22,7 +23,7 @@ class DeliveryNotePdfTest extends TestCase
         $order = SalesOrder::query()->create([
             'reference' => 'SO-2026-0007',
             'client_id' => $client->id,
-            'warehouse_id' => \App\Models\Warehouse::factory()->create()->id,
+            'warehouse_id' => Warehouse::factory()->create()->id,
             'status' => 'delivered',
             'order_date' => '2026-11-02',
             'delivered_at' => now(),

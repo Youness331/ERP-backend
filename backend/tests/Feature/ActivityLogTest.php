@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\ActivityLog;
 use App\Models\Client;
+use App\Models\StockMovement;
+use App\Observers\AuditObserver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\InteractsWithErp;
 use Tests\TestCase;
@@ -74,8 +76,8 @@ class ActivityLogTest extends TestCase
     {
         // The stock ledger already provides its own audit trail.
         $this->assertNotContains(
-            \App\Models\StockMovement::class,
-            \App\Observers\AuditObserver::MODELS,
+            StockMovement::class,
+            AuditObserver::MODELS,
         );
     }
 }
