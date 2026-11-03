@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\ActivityLogController;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\BankLineController;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\ClientController;
 use App\Http\Controllers\Api\V1\DashboardController;
@@ -176,6 +177,21 @@ Route::prefix('v1')->group(function () {
 
         Route::get('payments', [PaymentController::class, 'index'])->middleware('permission:payments.view');
         Route::get('payments/{payment}', [PaymentController::class, 'show'])->middleware('permission:payments.view');
+
+        /*
+        |--------------------------------------------------------------------
+        | Bank reconciliation
+        |--------------------------------------------------------------------
+        */
+        Route::prefix('bank-lines')->group(function () {
+            Route::get('/', [BankLineController::class, 'index'])->middleware('permission:bank.view');
+            Route::post('/', [BankLineController::class, 'store'])->middleware('permission:bank.create');
+            Route::get('summary', [BankLineController::class, 'summary'])->middleware('permission:bank.view');
+            Route::get('{bankLine}', [BankLineController::class, 'show'])->middleware('permission:bank.view');
+            Route::post('{bankLine}/match', [BankLineController::class, 'match'])->middleware('permission:bank.reconcile');
+            Route::post('{bankLine}/unmatch', [BankLineController::class, 'unmatch'])->middleware('permission:bank.reconcile');
+            Route::get('{bankLine}/suggestions', [BankLineController::class, 'suggestions'])->middleware('permission:bank.view');
+        });
 
         Route::get('activity-logs', [ActivityLogController::class, 'index'])->middleware('permission:audit.view');
 
