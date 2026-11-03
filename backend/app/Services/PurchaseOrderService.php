@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Enums\PaymentDirection;
 use App\Enums\PurchaseOrderStatus;
 use App\Exceptions\BusinessException;
 use App\Exceptions\InvalidStatusTransitionException;
+use App\Models\Payment;
 use App\Models\Product;
 use App\Models\PurchaseOrder;
 use App\Models\Stock;
@@ -19,6 +21,7 @@ class PurchaseOrderService
     public function __construct(
         private readonly ReferenceGenerator $references,
         private readonly StockService $stock,
+        private readonly PaymentService $payments,
     ) {}
 
     /**
@@ -39,6 +42,7 @@ class PurchaseOrderService
                 'expected_date' => $data['expected_date'] ?? null,
                 'notes' => $data['notes'] ?? null,
                 'created_by' => $user?->id ?? Auth::id(),
+                'balance_due' => $totals['total'],
             ] + $totals);
 
             $this->replaceLines($order, $lines);
@@ -67,6 +71,7 @@ class PurchaseOrderService
                 $order->fill(LineTotals::summarize($lines));
             }
 
+            $order->balance_due = max(0, round((float) $order->total - (float) $order->amount_paid, 2));
             $order->save();
 
             return $order->load(['supplier', 'warehouse', 'lines.product']);
@@ -163,6 +168,60 @@ class PurchaseOrderService
         $order->save();
 
         return $order->fresh(['supplier', 'warehouse', 'lines.product']);
+    }
+
+    /**
+     * Records a supplier payment (décaissement) against the order.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function recordPayment(PurchaseOrder $order, array $data, ?User $user = null): Payment
+    {
+        if (in_array($order->status, [PurchaseOrderStatus::Draft, PurchaseOrderStatus::Cancelled], true)) {
+            throw new BusinessException('Cette commande ne peut pas recevoir de paiement dans son statut actuel.');
+        }
+
+        $amount = round((float) $data['amount'], 2);
+        $balance = (float) $order->balance_due;
+
+        if ($amount <= 0) {
+            throw new BusinessException('Le montant du paiement doit être supérieur à zéro.');
+        }
+
+        if ($amount - $balance > 0.001) {
+            throw new BusinessException(sprintf(
+                'Le montant (%s MAD) dépasse le solde restant dû (%s MAD).',
+                number_format($amount, 2, ',', ' '),
+                number_format($balance, 2, ',', ' '),
+            ));
+        }
+
+        return DB::transaction(function () use ($order, $data, $amount, $user) {
+            $payment = $this->payments->create(
+                $order,
+                PaymentDirection::Outgoing,
+                ['amount' => $amount] + $data,
+                $user,
+            );
+
+            $this->refreshPaymentState($order);
+
+            return $payment->load('creator');
+        });
+    }
+
+    /**
+     * Recomputes the paid amount and the remaining balance.
+     */
+    public function refreshPaymentState(PurchaseOrder $order): PurchaseOrder
+    {
+        $paid = round((float) $order->payments()->sum('amount'), 2);
+
+        $order->amount_paid = $paid;
+        $order->balance_due = max(0, round((float) $order->total - $paid, 2));
+        $order->save();
+
+        return $order;
     }
 
     /**

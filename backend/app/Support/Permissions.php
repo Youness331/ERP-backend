@@ -119,7 +119,7 @@ final class Permissions
             'label' => 'Paiements',
             'actions' => [
                 'view' => 'Consulter les paiements',
-                'create' => 'Enregistrer un encaissement',
+                'create' => 'Enregistrer un paiement (encaissement ou décaissement)',
             ],
         ],
         'users' => [

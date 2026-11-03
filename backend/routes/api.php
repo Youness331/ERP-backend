@@ -116,6 +116,7 @@ Route::prefix('v1')->group(function () {
             Route::post('{purchaseOrder}/confirm', [PurchaseOrderController::class, 'confirm'])->middleware('permission:purchase_orders.confirm');
             Route::post('{purchaseOrder}/receive', [PurchaseOrderController::class, 'receive'])->middleware('permission:purchase_orders.receive');
             Route::post('{purchaseOrder}/cancel', [PurchaseOrderController::class, 'cancel'])->middleware('permission:purchase_orders.update');
+            Route::post('{purchaseOrder}/payments', [PurchaseOrderController::class, 'storePayment'])->middleware('permission:payments.create');
         });
 
         /*

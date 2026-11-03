@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Enums\InvoiceStatus;
 use App\Enums\InvoiceType;
 use App\Enums\PaymentDirection;
-use App\Enums\PaymentMethod;
 use App\Enums\SalesOrderStatus;
 use App\Exceptions\BusinessException;
 use App\Exceptions\InvalidStatusTransitionException;
@@ -23,6 +22,7 @@ class InvoiceService
 {
     public function __construct(
         private readonly ReferenceGenerator $references,
+        private readonly PaymentService $payments,
     ) {}
 
     /**
@@ -202,18 +202,12 @@ class InvoiceService
         }
 
         return DB::transaction(function () use ($invoice, $data, $amount, $user) {
-            $payment = Payment::create([
-                'reference' => $this->references->next('payment', 'PAY', today()),
-                'payable_type' => $invoice->getMorphClass(),
-                'payable_id' => $invoice->id,
-                'direction' => PaymentDirection::Incoming,
-                'method' => PaymentMethod::from($data['method'] ?? PaymentMethod::Cash->value),
-                'amount' => $amount,
-                'payment_date' => $data['payment_date'] ?? today(),
-                'reference_number' => $data['reference_number'] ?? null,
-                'notes' => $data['notes'] ?? null,
-                'created_by' => $user?->id ?? Auth::id(),
-            ]);
+            $payment = $this->payments->create(
+                $invoice,
+                PaymentDirection::Incoming,
+                ['amount' => $amount] + $data,
+                $user,
+            );
 
             $this->refreshStatus($invoice);
 

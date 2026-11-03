@@ -6,8 +6,10 @@ use App\Exceptions\BusinessException;
 use App\Http\Controllers\Concerns\Paginates;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ReceivePurchaseOrderRequest;
+use App\Http\Requests\StorePaymentRequest;
 use App\Http\Requests\StorePurchaseOrderRequest;
 use App\Http\Requests\UpdatePurchaseOrderRequest;
+use App\Http\Resources\PaymentResource;
 use App\Http\Resources\PurchaseOrderResource;
 use App\Models\PurchaseOrder;
 use App\Services\PurchaseOrderService;
@@ -90,5 +92,16 @@ class PurchaseOrderController extends Controller
     public function cancel(PurchaseOrder $purchaseOrder): PurchaseOrderResource
     {
         return new PurchaseOrderResource($this->purchaseOrders->cancel($purchaseOrder));
+    }
+
+    public function storePayment(StorePaymentRequest $request, PurchaseOrder $purchaseOrder): PaymentResource
+    {
+        $payment = $this->purchaseOrders->recordPayment(
+            $purchaseOrder,
+            $request->validated(),
+            $request->user(),
+        );
+
+        return new PaymentResource($payment);
     }
 }
