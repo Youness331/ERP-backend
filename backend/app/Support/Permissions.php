@@ -94,6 +94,17 @@ final class Permissions
                 'deliver' => 'Livrer une commande client',
             ],
         ],
+        'quotes' => [
+            'label' => 'Devis',
+            'actions' => [
+                'view' => 'Consulter les devis',
+                'create' => 'Créer un devis',
+                'update' => 'Modifier un devis',
+                'delete' => 'Supprimer un devis',
+                'send' => 'Envoyer un devis',
+                'convert' => 'Convertir un devis en commande',
+            ],
+        ],
         'invoices' => [
             'label' => 'Factures',
             'actions' => [
