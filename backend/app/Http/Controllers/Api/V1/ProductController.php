@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Controllers\Concerns\Paginates;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
@@ -15,6 +16,8 @@ use Illuminate\Http\Response;
 
 class ProductController extends Controller
 {
+    use Paginates;
+
     public function __construct(private readonly StockService $stock) {}
 
     public function index(Request $request): AnonymousResourceCollection
@@ -100,10 +103,5 @@ class ProductController extends Controller
         return $product
             ->loadSum('stocks as stocks_sum_quantity', 'quantity')
             ->loadSum('stocks as stocks_sum_reserved_quantity', 'reserved_quantity');
-    }
-
-    private function perPage(Request $request): int
-    {
-        return min(max($request->integer('per_page', 15), 1), 100);
     }
 }

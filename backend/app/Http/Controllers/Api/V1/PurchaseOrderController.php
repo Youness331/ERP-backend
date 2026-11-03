@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Exceptions\BusinessException;
+use App\Http\Controllers\Concerns\Paginates;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ReceivePurchaseOrderRequest;
 use App\Http\Requests\StorePurchaseOrderRequest;
@@ -16,6 +17,8 @@ use Illuminate\Http\Response;
 
 class PurchaseOrderController extends Controller
 {
+    use Paginates;
+
     public function __construct(private readonly PurchaseOrderService $purchaseOrders) {}
 
     public function index(Request $request): AnonymousResourceCollection
@@ -87,10 +90,5 @@ class PurchaseOrderController extends Controller
     public function cancel(PurchaseOrder $purchaseOrder): PurchaseOrderResource
     {
         return new PurchaseOrderResource($this->purchaseOrders->cancel($purchaseOrder));
-    }
-
-    private function perPage(Request $request): int
-    {
-        return min(max($request->integer('per_page', 15), 1), 100);
     }
 }

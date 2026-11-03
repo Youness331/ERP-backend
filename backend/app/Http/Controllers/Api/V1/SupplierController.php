@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Exceptions\BusinessException;
+use App\Http\Controllers\Concerns\Paginates;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSupplierRequest;
 use App\Http\Requests\UpdateSupplierRequest;
@@ -15,6 +16,8 @@ use Illuminate\Http\Response;
 
 class SupplierController extends Controller
 {
+    use Paginates;
+
     public function __construct(private readonly ReferenceGenerator $references) {}
 
     public function index(Request $request): AnonymousResourceCollection
@@ -62,9 +65,7 @@ class SupplierController extends Controller
 
     public function destroy(Supplier $supplier): Response
     {
-        $hasOpenOrders = $supplier->purchaseOrders()
-            ->whereIn('status', ['draft', 'confirmed', 'partially_received'])
-            ->exists();
+        $hasOpenOrders = $supplier->purchaseOrders()->open()->exists();
 
         if ($hasOpenOrders) {
             throw new BusinessException('Impossible de supprimer un fournisseur ayant des commandes en cours.');
@@ -73,10 +74,5 @@ class SupplierController extends Controller
         $supplier->delete();
 
         return response()->noContent();
-    }
-
-    private function perPage(Request $request): int
-    {
-        return min(max($request->integer('per_page', 15), 1), 100);
     }
 }

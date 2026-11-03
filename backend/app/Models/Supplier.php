@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Searchable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Supplier extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, Searchable, SoftDeletes;
 
     protected $fillable = [
         'code', 'name', 'company_name', 'contact_name', 'email', 'phone',
@@ -41,20 +42,11 @@ class Supplier extends Model
         return $query->where('is_active', true);
     }
 
-    public function scopeSearch(Builder $query, ?string $term): Builder
+    /**
+     * @return list<string>
+     */
+    protected function searchableColumns(): array
     {
-        if (blank($term)) {
-            return $query;
-        }
-
-        $like = '%'.str_replace(['%', '_'], ['\%', '\_'], $term).'%';
-
-        return $query->where(function (Builder $q) use ($like) {
-            $q->where('name', 'like', $like)
-                ->orWhere('code', 'like', $like)
-                ->orWhere('company_name', 'like', $like)
-                ->orWhere('email', 'like', $like)
-                ->orWhere('phone', 'like', $like);
-        });
+        return ['name', 'code', 'company_name', 'email', 'phone'];
     }
 }

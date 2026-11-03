@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Exceptions\BusinessException;
+use App\Http\Controllers\Concerns\Paginates;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreInvoiceRequest;
 use App\Http\Requests\StorePaymentRequest;
@@ -17,6 +18,8 @@ use Illuminate\Http\Response;
 
 class InvoiceController extends Controller
 {
+    use Paginates;
+
     public function __construct(private readonly InvoiceService $invoices) {}
 
     public function index(Request $request): AnonymousResourceCollection
@@ -94,10 +97,5 @@ class InvoiceController extends Controller
         $payment = $this->invoices->recordPayment($invoice, $request->validated(), $request->user());
 
         return new PaymentResource($payment);
-    }
-
-    private function perPage(Request $request): int
-    {
-        return min(max($request->integer('per_page', 15), 1), 100);
     }
 }

@@ -70,6 +70,18 @@ class PurchaseOrder extends Model
         return blank($status) ? $query : $query->where('status', $status);
     }
 
+    /**
+     * Orders that still expect goods from the supplier.
+     */
+    public function scopeOpen(Builder $query): Builder
+    {
+        return $query->whereIn('status', [
+            PurchaseOrderStatus::Draft,
+            PurchaseOrderStatus::Confirmed,
+            PurchaseOrderStatus::PartiallyReceived,
+        ]);
+    }
+
     public function isFullyReceived(): bool
     {
         return $this->lines->every(

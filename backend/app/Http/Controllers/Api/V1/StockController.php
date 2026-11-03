@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Enums\StockMovementType;
 use App\Exceptions\BusinessException;
+use App\Http\Controllers\Concerns\Paginates;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreStockMovementRequest;
 use App\Http\Resources\StockMovementResource;
@@ -18,6 +19,8 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class StockController extends Controller
 {
+    use Paginates;
+
     public function __construct(private readonly StockService $stock) {}
 
     /**
@@ -110,10 +113,5 @@ class StockController extends Controller
         }
 
         return new StockMovementResource($movement->load(['product', 'warehouse', 'user']));
-    }
-
-    private function perPage(Request $request): int
-    {
-        return min(max($request->integer('per_page', 15), 1), 100);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Controllers\Concerns\Paginates;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PaymentResource;
 use App\Models\Payment;
@@ -10,6 +11,8 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class PaymentController extends Controller
 {
+    use Paginates;
+
     public function index(Request $request): AnonymousResourceCollection
     {
         $query = Payment::query()->with(['creator']);
@@ -46,10 +49,5 @@ class PaymentController extends Controller
     public function show(Payment $payment): PaymentResource
     {
         return new PaymentResource($payment->load(['creator', 'payable']));
-    }
-
-    private function perPage(Request $request): int
-    {
-        return min(max($request->integer('per_page', 15), 1), 100);
     }
 }
