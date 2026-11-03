@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\PurchaseOrderController;
 use App\Http\Controllers\Api\V1\QuoteController;
+use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\RoleController;
 use App\Http\Controllers\Api\V1\SalesOrderController;
 use App\Http\Controllers\Api\V1\StockController;
@@ -180,6 +181,18 @@ Route::prefix('v1')->group(function () {
         | Administration
         |--------------------------------------------------------------------
         */
+        /*
+        |--------------------------------------------------------------------
+        | Reports
+        |--------------------------------------------------------------------
+        */
+        Route::prefix('reports')->middleware('permission:reports.view')->group(function () {
+            Route::get('sales', [ReportController::class, 'sales']);
+            Route::get('purchases', [ReportController::class, 'purchases']);
+            Route::get('stock-valuation', [ReportController::class, 'stockValuation']);
+            Route::get('receivables-aging', [ReportController::class, 'receivablesAging']);
+        });
+
         Route::prefix('users')->group(function () {
             Route::get('/', [UserController::class, 'index'])->middleware('permission:users.view');
             Route::post('/', [UserController::class, 'store'])->middleware('permission:users.create');

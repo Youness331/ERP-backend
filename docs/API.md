@@ -392,7 +392,45 @@ automatiquement : `sent` → `partially_paid` → `paid`, ou `overdue` après é
 Chaque création, modification ou suppression sur les clients, fournisseurs, produits,
 commandes, devis, factures et paiements écrit une entrée. Les mouvements de stock ne
 sont pas journalisés ici : le journal de stock fait déjà office de piste d'audit.
-## 14. Administration
+## 14. Rapports — `reports.view`
+
+| Méthode | Route | Description |
+| --- | --- | --- |
+| GET | `/reports/sales?from=&to=` | CA, TVA, remises, panier moyen, CA par mois, top produits, top clients |
+| GET | `/reports/purchases?from=&to=` | Dépenses, montant payé, reste dû, top fournisseurs |
+| GET | `/reports/stock-valuation` | Valeur du stock par entrepôt (quantité × coût moyen) |
+| GET | `/reports/receivables-aging` | Balance âgée des créances par tranche d'ancienneté |
+
+```json
+GET /reports/sales?from=2026-01-01&to=2026-12-31
+
+{
+  "data": {
+    "period": { "from": "2026-01-01", "to": "2026-12-31" },
+    "invoice_count": 42,
+    "revenue": 1284500,
+    "tax_collected": 257400,
+    "discounts_granted": 12000,
+    "average_invoice": 30583.33,
+    "by_month": [ { "month": "2026-01", "total": 98400 } ],
+    "top_products": [
+      { "product_id": 4, "name": "Ramette A4", "sku": "REF-0012-AB", "quantity": 96, "revenue": 24120 }
+    ],
+    "top_clients": [
+      { "client_id": 3, "client": "Atlas Distribution", "revenue": 210000, "invoices": 6 }
+    ]
+  }
+}
+```
+
+### Balance âgée
+
+`GET /reports/receivables-aging` renvoie cinq tranches : `current` (non échu),
+`days_1_30`, `days_31_60`, `days_61_90`, `over_90`, avec le montant et le nombre de
+factures par tranche.
+
+Sans `from`/`to`, la période par défaut est le mois en cours.
+## 15. Administration
 
 | Méthode | Route | Permission |
 | --- | --- | --- |
@@ -412,7 +450,7 @@ de droits côté Angular :
 { "data": [ { "module": "clients", "permissions": [ { "id": 1, "name": "clients.view", "label": "Consulter les clients" } ] } ] }
 ```
 
-## 15. Rôles livrés
+## 16. Rôles livrés
 
 | Rôle | Portée |
 | --- | --- |
@@ -422,7 +460,7 @@ de droits côté Angular :
 | `stock_manager` | Catalogue, entrepôts, stock, réceptions |
 | `sales` | Clients, commandes de vente, livraisons, facturation |
 
-## 16. Tâches planifiées
+## 17. Tâches planifiées
 
 | Commande | Fréquence | Effet |
 | --- | --- | --- |
