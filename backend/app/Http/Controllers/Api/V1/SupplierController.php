@@ -65,9 +65,7 @@ class SupplierController extends Controller
 
     public function destroy(Supplier $supplier): Response
     {
-        $hasOpenOrders = $supplier->purchaseOrders()
-            ->whereIn('status', ['draft', 'confirmed', 'partially_received'])
-            ->exists();
+        $hasOpenOrders = $supplier->purchaseOrders()->open()->exists();
 
         if ($hasOpenOrders) {
             throw new BusinessException('Impossible de supprimer un fournisseur ayant des commandes en cours.');
