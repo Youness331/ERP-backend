@@ -495,3 +495,28 @@ de droits côté Angular :
 
 Les deux réponses sont de type `application/pdf` avec un `Content-Disposition: attachment`
 nommé d'après la référence du document (`FAC-2026-0001.pdf`, `SO-2026-0007.pdf`).
+
+## 19. Rapprochement bancaire — `bank.*`
+
+| Méthode | Route | Permission |
+| --- | --- | --- |
+| GET | `/bank-lines?status=&direction=&from=&to=` | `bank.view` |
+| POST | `/bank-lines` | `bank.create` |
+| GET | `/bank-lines/summary` | `bank.view` |
+| GET | `/bank-lines/{id}` | `bank.view` |
+| GET | `/bank-lines/{id}/suggestions` | `bank.view` |
+| POST | `/bank-lines/{id}/match` | `bank.reconcile` |
+| POST | `/bank-lines/{id}/unmatch` | `bank.reconcile` |
+
+```json
+POST /bank-lines
+{ "label": "VIR CLIENT ATLAS", "amount": 240, "direction": "in", "value_date": "2026-11-03", "reference": "VIR-8891" }
+
+POST /bank-lines/5/match
+{ "payment_id": 31 }
+```
+
+Le rapprochement exige un paiement de **même sens** et de **même montant** (tolérance
+d'un centime). Un paiement ne peut être rapproché qu'une seule fois ; `unmatch` libère
+la ligne et le paiement.
+

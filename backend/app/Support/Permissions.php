@@ -122,6 +122,14 @@ final class Permissions
                 'create' => 'Enregistrer un paiement (encaissement ou décaissement)',
             ],
         ],
+        'bank' => [
+            'label' => 'Rapprochement bancaire',
+            'actions' => [
+                'view' => 'Consulter les relevés bancaires',
+                'create' => 'Saisir une ligne de relevé',
+                'reconcile' => 'Rapprocher une ligne avec un paiement',
+            ],
+        ],
         'reports' => [
             'label' => 'Rapports',
             'actions' => [
