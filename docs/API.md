@@ -183,6 +183,7 @@ Une sortie supérieure au disponible renvoie `422` avec un message explicite.
 | POST | `/purchase-orders/{id}/confirm` | `purchase_orders.confirm` |
 | POST | `/purchase-orders/{id}/receive` | `purchase_orders.receive` |
 | POST | `/purchase-orders/{id}/cancel` | `purchase_orders.update` |
+| POST | `/purchase-orders/{id}/payments` | `payments.create` |
 
 ```json
 POST /purchase-orders
@@ -214,6 +215,16 @@ POST /purchase-orders/12/receive
 Les quantités reçues sont **plafonnées** au reste à recevoir ; le statut passe à
 `partially_received` puis `received`.
 
+### Décaissements
+
+```json
+POST /purchase-orders/12/payments
+{ "amount": 2500, "method": "bank_transfer", "reference_number": "VIR-4412" }
+```
+
+Les paiements fournisseurs sont enregistrés avec `direction: "out"` et réduisent
+`balance_due`, initialisé au total de la commande. Un paiement supérieur au solde,
+ou sur une commande brouillon/annulée, renvoie `422`.
 ## 9. Ventes — `sales_orders.*`
 
 | Méthode | Route | Permission |

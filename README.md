@@ -67,7 +67,7 @@ HTTP → Controller (mince) → FormRequest (validation) → Service (règles m�
 | **Ventes** | Commandes clients, confirmation (réservation), livraison totale/partielle, annulation |
 | **Devis** | Brouillon → envoyé → accepté/refusé → conversion en commande, validité automatique, expiration planifiée |
 | **Facturation** | Factures & avoirs, envoi, annulation, génération depuis une commande livrée |
-| **Paiements** | Encaissements partiels/totaux, statuts automatiques, détection des retards |
+| **Paiements** | Encaissements clients et décaissements fournisseurs, partiels ou totaux, statuts automatiques, détection des retards |
 | **Tableau de bord** | CA du mois (+ croissance), encaissements, créances, retards, stock faible, valeur du stock, top produits, série 12 mois |
 
 ## Règles métier
