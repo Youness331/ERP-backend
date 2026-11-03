@@ -34,7 +34,7 @@ stock, achats, ventes, facturation, encaissements) pour une PME marocaine :
 | Authentification | Laravel Sanctum (tokens Bearer) |
 | Serveur web | Nginx + PHP-FPM |
 | Conteneurisation | Docker Compose |
-| Tests | PHPUnit 11 (171 tests, 654 assertions) |
+| Tests | PHPUnit 11 (179 tests, 680 assertions) |
 | Style | Laravel Pint (PSR-12) |
 
 ## Architecture
@@ -203,7 +203,7 @@ Tests fonctionnels :
 │   │   ├── migrations/       # 10 migrations métier
 │   │   └── seeders/
 │   ├── routes/api.php
-│   └── tests/                # 171 tests (unit + feature)
+│   └── tests/                # 179 tests (unit + feature)
 ├── docker/                   # PHP-FPM, Nginx, php.ini
 ├── docker-compose.yml
 ├── docs/API.md
@@ -214,6 +214,5 @@ Tests fonctionnels :
 
 - [ ] Frontend Angular (dashboard, listes, formulaires, guards par permission)
 - [ ] Rapprochement bancaire des décaissements
-- [ ] Avoirs générés depuis une facture
 - [ ] Notifications (email facture, alerte stock) via queue Redis
 - [ ] Multi-société / multi-devise

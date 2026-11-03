@@ -333,6 +333,7 @@ draft ──send──▶ sent ──accept──▶ accepted ──convert─�
 | POST | `/invoices/{id}/cancel` | `invoices.update` |
 | POST | `/invoices/{id}/payments` | `payments.create` |
 | GET | `/invoices/{id}/pdf` | `invoices.view` |
+| POST | `/invoices/{id}/credit-note` | `invoices.create` |
 
 Filtres : `?status=`, `?type=invoice|credit_note`, `?outstanding=1`, `?client_id=`, `?from=`, `?to=`.
 
@@ -362,6 +363,22 @@ POST /invoices/12/payments
 Un montant supérieur au solde dû est refusé (`422`). Les statuts évoluent
 automatiquement : `sent` → `partially_paid` → `paid`, ou `overdue` après échéance.
 
+### Avoirs
+
+```json
+POST /invoices/12/credit-note
+{
+  "lines": [
+    { "description": "Geste commercial", "quantity": 1, "unit_price": 100, "tax_rate": 20 }
+  ]
+}
+```
+
+Sans `lines`, l'avoir reprend toutes les lignes de la facture (crédit total).
+Un avoir naît en `draft` avec une référence `AVR-YYYY-NNNN` ; à l'envoi il augmente
+`credited_amount` et réduit `balance_due` de la facture d'origine. Un montant
+supérieur au solde restant dû, ou un avoir sur un brouillon, renvoie `422`.
+Annuler un avoir envoyé restaure le solde.
 ## 12. Paiements — `payments.view`
 
 | Méthode | Route |
