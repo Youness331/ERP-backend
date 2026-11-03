@@ -122,6 +122,12 @@ final class Permissions
                 'create' => 'Enregistrer un paiement (encaissement ou décaissement)',
             ],
         ],
+        'audit' => [
+            'label' => 'Journal d\'activité',
+            'actions' => [
+                'view' => 'Consulter le journal d\'activité',
+            ],
+        ],
         'users' => [
             'label' => 'Utilisateurs',
             'actions' => [
