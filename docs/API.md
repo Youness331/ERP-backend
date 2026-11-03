@@ -238,6 +238,7 @@ ou sur une commande brouillon/annulée, renvoie `422`.
 | POST | `/sales-orders/{id}/deliver` | `sales_orders.deliver` |
 | POST | `/sales-orders/{id}/cancel` | `sales_orders.update` |
 | POST | `/sales-orders/{id}/invoice` | `invoices.create` |
+| GET | `/sales-orders/{id}/delivery-note` | `sales_orders.view` |
 
 ```json
 POST /sales-orders
@@ -331,6 +332,7 @@ draft ──send──▶ sent ──accept──▶ accepted ──convert─�
 | POST | `/invoices/{id}/send` | `invoices.send` |
 | POST | `/invoices/{id}/cancel` | `invoices.update` |
 | POST | `/invoices/{id}/payments` | `payments.create` |
+| GET | `/invoices/{id}/pdf` | `invoices.view` |
 
 Filtres : `?status=`, `?type=invoice|credit_note`, `?outstanding=1`, `?client_id=`, `?from=`, `?to=`.
 
@@ -466,3 +468,13 @@ de droits côté Angular :
 | --- | --- | --- |
 | `php artisan erp:refresh-overdue-invoices` | Quotidien 01:00 | Passe en `overdue` les factures impayées échues |
 | `php artisan erp:expire-quotes` | Quotidien 01:15 | Passe en `expired` les devis dont la validité est dépassée |
+
+## 18. Documents PDF
+
+| Route | Permission | Contenu |
+| --- | --- | --- |
+| `GET /invoices/{id}/pdf` | `invoices.view` | Facture A4 : en-tête société, mentions fiscales (ICE, IF, RC), lignes et totaux |
+| `GET /sales-orders/{id}/delivery-note` | `sales_orders.view` | Bon de livraison : quantités commandées/livrées et blocs de signature |
+
+Les deux réponses sont de type `application/pdf` avec un `Content-Disposition: attachment`
+nommé d'après la référence du document (`FAC-2026-0001.pdf`, `SO-2026-0007.pdf`).

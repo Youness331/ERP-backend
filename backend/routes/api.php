@@ -136,6 +136,7 @@ Route::prefix('v1')->group(function () {
             Route::post('{salesOrder}/deliver', [SalesOrderController::class, 'deliver'])->middleware('permission:sales_orders.deliver');
             Route::post('{salesOrder}/cancel', [SalesOrderController::class, 'cancel'])->middleware('permission:sales_orders.update');
             Route::post('{salesOrder}/invoice', [SalesOrderController::class, 'invoice'])->middleware('permission:invoices.create');
+            Route::get('{salesOrder}/delivery-note', [SalesOrderController::class, 'deliveryNote'])->middleware('permission:sales_orders.view');
         });
 
         /*
@@ -169,6 +170,7 @@ Route::prefix('v1')->group(function () {
             Route::post('{invoice}/send', [InvoiceController::class, 'send'])->middleware('permission:invoices.send');
             Route::post('{invoice}/cancel', [InvoiceController::class, 'cancel'])->middleware('permission:invoices.update');
             Route::post('{invoice}/payments', [InvoiceController::class, 'storePayment'])->middleware('permission:payments.create');
+            Route::get('{invoice}/pdf', [InvoiceController::class, 'pdf'])->middleware('permission:invoices.view');
         });
 
         Route::get('payments', [PaymentController::class, 'index'])->middleware('permission:payments.view');
