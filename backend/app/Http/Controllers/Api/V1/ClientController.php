@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Exceptions\BusinessException;
+use App\Http\Controllers\Concerns\Paginates;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreClientRequest;
 use App\Http\Requests\UpdateClientRequest;
@@ -15,6 +16,8 @@ use Illuminate\Http\Response;
 
 class ClientController extends Controller
 {
+    use Paginates;
+
     public function __construct(private readonly ReferenceGenerator $references) {}
 
     public function index(Request $request): AnonymousResourceCollection
@@ -73,10 +76,5 @@ class ClientController extends Controller
         $client->delete();
 
         return response()->noContent();
-    }
-
-    private function perPage(Request $request): int
-    {
-        return min(max($request->integer('per_page', 15), 1), 100);
     }
 }

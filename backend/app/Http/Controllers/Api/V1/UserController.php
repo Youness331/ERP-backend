@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Exceptions\BusinessException;
+use App\Http\Controllers\Concerns\Paginates;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
@@ -14,6 +15,8 @@ use Illuminate\Http\Response;
 
 class UserController extends Controller
 {
+    use Paginates;
+
     public function index(Request $request): AnonymousResourceCollection
     {
         $query = User::query()->with('role');
@@ -73,10 +76,5 @@ class UserController extends Controller
         $user->delete();
 
         return response()->noContent();
-    }
-
-    private function perPage(Request $request): int
-    {
-        return min(max($request->integer('per_page', 15), 1), 100);
     }
 }

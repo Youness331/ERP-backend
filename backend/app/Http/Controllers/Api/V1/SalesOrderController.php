@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Exceptions\BusinessException;
+use App\Http\Controllers\Concerns\Paginates;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DeliverSalesOrderRequest;
 use App\Http\Requests\StoreSalesOrderRequest;
@@ -17,6 +18,8 @@ use Illuminate\Http\Response;
 
 class SalesOrderController extends Controller
 {
+    use Paginates;
+
     public function __construct(private readonly SalesOrderService $salesOrders) {}
 
     public function index(Request $request): AnonymousResourceCollection
@@ -95,10 +98,5 @@ class SalesOrderController extends Controller
         $invoice = $this->salesOrders->invoice($salesOrder, $request->user());
 
         return new InvoiceResource($invoice);
-    }
-
-    private function perPage(Request $request): int
-    {
-        return min(max($request->integer('per_page', 15), 1), 100);
     }
 }
