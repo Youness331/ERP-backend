@@ -12,6 +12,7 @@ use App\Http\Resources\InvoiceResource;
 use App\Http\Resources\PaymentResource;
 use App\Models\Invoice;
 use App\Services\InvoiceService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
@@ -97,5 +98,20 @@ class InvoiceController extends Controller
         $payment = $this->invoices->recordPayment($invoice, $request->validated(), $request->user());
 
         return new PaymentResource($payment);
+    }
+
+    /**
+     * Renders the invoice as a printable PDF document.
+     */
+    public function pdf(Invoice $invoice): Response
+    {
+        $invoice->load(['client', 'lines.product']);
+
+        $pdf = Pdf::loadView('documents.invoice', [
+            'invoice' => $invoice,
+            'company' => config('erp.company'),
+        ])->setPaper('a4');
+
+        return $pdf->download($invoice->reference.'.pdf');
     }
 }
