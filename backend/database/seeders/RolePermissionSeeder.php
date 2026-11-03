@@ -50,6 +50,7 @@ class RolePermissionSeeder extends Seeder
                     'invoices.delete',
                     'payments.view',
                     'payments.create',
+                    'reports.view',
                 ],
             ],
             'stock_manager' => [
