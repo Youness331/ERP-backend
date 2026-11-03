@@ -18,7 +18,7 @@ class PurchaseOrder extends Model
     protected $fillable = [
         'reference', 'supplier_id', 'warehouse_id', 'status', 'order_date',
         'expected_date', 'received_at', 'subtotal', 'discount_total',
-        'tax_total', 'total', 'notes', 'created_by',
+        'tax_total', 'total', 'amount_paid', 'balance_due', 'notes', 'created_by',
     ];
 
     protected function casts(): array
@@ -32,6 +32,8 @@ class PurchaseOrder extends Model
             'discount_total' => 'decimal:2',
             'tax_total' => 'decimal:2',
             'total' => 'decimal:2',
+            'amount_paid' => 'decimal:2',
+            'balance_due' => 'decimal:2',
         ];
     }
 
