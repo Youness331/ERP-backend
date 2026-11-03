@@ -17,9 +17,9 @@ class Invoice extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'reference', 'client_id', 'sales_order_id', 'type', 'status',
+        'reference', 'client_id', 'sales_order_id', 'parent_invoice_id', 'type', 'status',
         'issue_date', 'due_date', 'subtotal', 'discount_total', 'tax_total',
-        'total', 'amount_paid', 'balance_due', 'notes', 'created_by',
+        'total', 'amount_paid', 'credited_amount', 'balance_due', 'notes', 'created_by',
     ];
 
     protected function casts(): array
@@ -34,8 +34,19 @@ class Invoice extends Model
             'tax_total' => 'decimal:2',
             'total' => 'decimal:2',
             'amount_paid' => 'decimal:2',
+            'credited_amount' => 'decimal:2',
             'balance_due' => 'decimal:2',
         ];
+    }
+
+    public function parentInvoice(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'parent_invoice_id');
+    }
+
+    public function creditNotes(): HasMany
+    {
+        return $this->hasMany(self::class, 'parent_invoice_id');
     }
 
     public function client(): BelongsTo
@@ -75,16 +86,19 @@ class Invoice extends Model
 
     public function scopeOutstanding(Builder $query): Builder
     {
-        return $query->whereIn('status', [
-            InvoiceStatus::Sent,
-            InvoiceStatus::PartiallyPaid,
-            InvoiceStatus::Overdue,
-        ])->where('balance_due', '>', 0);
+        return $query
+            ->where('type', InvoiceType::Invoice->value)
+            ->whereIn('status', [
+                InvoiceStatus::Sent,
+                InvoiceStatus::PartiallyPaid,
+                InvoiceStatus::Overdue,
+            ])->where('balance_due', '>', 0);
     }
 
     public function isOverdue(): bool
     {
-        return $this->balance_due > 0
+        return $this->type === InvoiceType::Invoice
+            && $this->balance_due > 0
             && $this->status->isOutstanding()
             && $this->due_date->isBefore(today());
     }

@@ -55,7 +55,7 @@ class InvoiceService
                 'notes' => $data['notes'] ?? null,
                 'created_by' => $user?->id ?? Auth::id(),
                 'amount_paid' => 0,
-                'balance_due' => $totals['total'],
+                'balance_due' => $type === InvoiceType::CreditNote ? 0 : $totals['total'],
             ] + $totals);
 
             foreach ($lines as $line) {
@@ -107,6 +107,10 @@ class InvoiceService
         if ($invoice->status === InvoiceStatus::Draft) {
             $invoice->status = InvoiceStatus::Sent;
             $invoice->save();
+
+            if ($invoice->type === InvoiceType::CreditNote && $invoice->parent_invoice_id !== null) {
+                $this->applyCredit($invoice);
+            }
         }
 
         $this->refreshStatus($invoice);
@@ -124,8 +128,16 @@ class InvoiceService
             return $invoice;
         }
 
+        $wasApplied = $invoice->type === InvoiceType::CreditNote
+            && $invoice->parent_invoice_id !== null
+            && $invoice->status === InvoiceStatus::Sent;
+
         $invoice->status = InvoiceStatus::Cancelled;
         $invoice->save();
+
+        if ($wasApplied) {
+            $this->revertCredit($invoice);
+        }
 
         return $invoice->fresh(['client', 'lines.product']);
     }
@@ -178,6 +190,100 @@ class InvoiceService
     }
 
     /**
+     * Issues a credit note (avoir) against an invoice.
+     *
+     * When no lines are given the whole remaining balance is credited.
+     *
+     * @param  array<int, array<string, mixed>>|null  $lines
+     */
+    public function creditNoteFrom(Invoice $invoice, ?array $lines = null, ?User $user = null): Invoice
+    {
+        if ($invoice->type !== InvoiceType::Invoice) {
+            throw new BusinessException('Un avoir ne peut être émis qu\'à partir d\'une facture.');
+        }
+
+        if (in_array($invoice->status, [InvoiceStatus::Draft, InvoiceStatus::Cancelled], true)) {
+            throw new BusinessException('Cette facture ne peut pas être avoirée dans son statut actuel.');
+        }
+
+        $invoice->loadMissing('lines.product');
+
+        $lines ??= $invoice->lines->map(fn ($line) => [
+            'product_id' => $line->product_id,
+            'description' => $line->description,
+            'quantity' => (float) $line->quantity,
+            'unit_price' => (float) $line->unit_price,
+            'discount' => (float) $line->discount,
+            'tax_rate' => (float) $line->tax_rate,
+        ])->values()->all();
+
+        if ($lines === []) {
+            throw new BusinessException('Aucune ligne à créditer sur cette facture.');
+        }
+
+        $creditTotal = LineTotals::summarize($this->prepareLines($lines))['total'];
+        $remaining = round((float) $invoice->balance_due, 2);
+
+        if ($creditTotal - $remaining > 0.001) {
+            throw new BusinessException(sprintf(
+                'Le montant de l\'avoir (%s MAD) dépasse le solde restant dû (%s MAD).',
+                number_format($creditTotal, 2, ',', ' '),
+                number_format($remaining, 2, ',', ' '),
+            ));
+        }
+
+        return DB::transaction(function () use ($invoice, $lines, $user) {
+            $credit = $this->create([
+                'client_id' => $invoice->client_id,
+                'type' => InvoiceType::CreditNote->value,
+                'issue_date' => today()->toDateString(),
+                'due_date' => today()->toDateString(),
+                'notes' => sprintf('Avoir sur la facture %s', $invoice->reference),
+                'lines' => $lines,
+            ], $user);
+
+            $credit->parent_invoice_id = $invoice->id;
+            $credit->save();
+
+            return $credit->load(['client', 'lines.product']);
+        });
+    }
+
+    /**
+     * Books the credit note against its parent invoice.
+     */
+    private function applyCredit(Invoice $creditNote): void
+    {
+        $parent = $creditNote->parentInvoice;
+
+        if ($parent === null) {
+            return;
+        }
+
+        $parent->credited_amount = round((float) $parent->credited_amount + (float) $creditNote->total, 2);
+        $parent->save();
+
+        $this->refreshStatus($parent);
+    }
+
+    /**
+     * Releases the credit when a sent credit note is cancelled.
+     */
+    private function revertCredit(Invoice $creditNote): void
+    {
+        $parent = $creditNote->parentInvoice;
+
+        if ($parent === null) {
+            return;
+        }
+
+        $parent->credited_amount = round(max(0, (float) $parent->credited_amount - (float) $creditNote->total), 2);
+        $parent->save();
+
+        $this->refreshStatus($parent);
+    }
+
+    /**
      * @param  array{amount: float|int|string, method?: string, payment_date?: string, reference_number?: string|null, notes?: string|null}  $data
      */
     public function recordPayment(Invoice $invoice, array $data, ?User $user = null): Payment
@@ -224,15 +330,25 @@ class InvoiceService
             return $invoice;
         }
 
+        // A credit note is not a receivable: it settles against its parent invoice.
+        if ($invoice->type === InvoiceType::CreditNote) {
+            $invoice->amount_paid = 0;
+            $invoice->balance_due = 0;
+            $invoice->save();
+
+            return $invoice;
+        }
+
         $paid = round((float) $invoice->payments()->sum('amount'), 2);
-        $balance = round((float) $invoice->total - $paid, 2);
+        $credited = round((float) $invoice->credited_amount, 2);
+        $balance = round((float) $invoice->total - $paid - $credited, 2);
 
         $invoice->amount_paid = $paid;
         $invoice->balance_due = max(0, $balance);
 
         $invoice->status = match (true) {
             $balance <= 0 => InvoiceStatus::Paid,
-            $paid > 0 => InvoiceStatus::PartiallyPaid,
+            $paid > 0 || $credited > 0 => InvoiceStatus::PartiallyPaid,
             $invoice->due_date->isBefore(today()) => InvoiceStatus::Overdue,
             default => InvoiceStatus::Sent,
         };
