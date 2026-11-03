@@ -334,6 +334,7 @@ draft ──send──▶ sent ──accept──▶ accepted ──convert─�
 | POST | `/invoices/{id}/payments` | `payments.create` |
 | GET | `/invoices/{id}/pdf` | `invoices.view` |
 | POST | `/invoices/{id}/credit-note` | `invoices.create` |
+| POST | `/invoices/{id}/email` | `invoices.send` |
 
 Filtres : `?status=`, `?type=invoice|credit_note`, `?outstanding=1`, `?client_id=`, `?from=`, `?to=`.
 
@@ -520,3 +521,15 @@ Le rapprochement exige un paiement de **même sens** et de **même montant** (to
 d'un centime). Un paiement ne peut être rapproché qu'une seule fois ; `unmatch` libère
 la ligne et le paiement.
 
+## 20. Notifications
+
+| Route | Permission | Effet |
+| --- | --- | --- |
+| `POST /invoices/{id}/email` | `invoices.send` | Met en file l'envoi de la facture (PDF joint) au client — réponse `202` |
+
+L'envoi passe par la queue (`QUEUE_CONNECTION=redis` avec Docker) : le worker
+`queue` du compose exécute le job puis expédie le mail via le `MAIL_MAILER` configuré.
+Sans adresse email chez le client, l'endpoint renvoie `422`.
+
+Tâche planifiée : `erp:stock-alerts` (07:00) envoie à `ERP_ALERT_EMAIL` la liste des
+produits au niveau ou en dessous de leur seuil de réapprovisionnement.
