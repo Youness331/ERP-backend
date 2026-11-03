@@ -12,6 +12,7 @@ use App\Http\Resources\InvoiceResource;
 use App\Http\Resources\SalesOrderResource;
 use App\Models\SalesOrder;
 use App\Services\SalesOrderService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
@@ -98,5 +99,20 @@ class SalesOrderController extends Controller
         $invoice = $this->salesOrders->invoice($salesOrder, $request->user());
 
         return new InvoiceResource($invoice);
+    }
+
+    /**
+     * Renders the delivery note (bon de livraison) as a PDF.
+     */
+    public function deliveryNote(SalesOrder $salesOrder): Response
+    {
+        $salesOrder->load(['client', 'lines.product']);
+
+        $pdf = Pdf::loadView('documents.delivery-note', [
+            'order' => $salesOrder,
+            'company' => config('erp.company'),
+        ])->setPaper('a4');
+
+        return $pdf->download($salesOrder->reference.'.pdf');
     }
 }
