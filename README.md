@@ -34,7 +34,7 @@ stock, achats, ventes, facturation, encaissements) pour une PME marocaine :
 | Authentification | Laravel Sanctum (tokens Bearer) |
 | Serveur web | Nginx + PHP-FPM |
 | Conteneurisation | Docker Compose |
-| Tests | PHPUnit 11 (148 tests, 560 assertions) |
+| Tests | PHPUnit 11 (160 tests, 613 assertions) |
 | Style | Laravel Pint (PSR-12) |
 
 ## Architecture
@@ -57,7 +57,7 @@ HTTP → Controller (mince) → FormRequest (validation) → Service (règles m�
 | Module | Fonctionnalités |
 | --- | --- |
 | **Authentification** | Login token, profil, changement de mot de passe, déconnexion, comptes désactivables |
-| **Rôles & permissions** | 5 rôles, 53 permissions granulaires, matrice consultable |
+| **Rôles & permissions** | 5 rôles, 54 permissions granulaires, matrice consultable |
 | **Clients** | CRUD, recherche, pagination, champs fiscaux marocains (ICE, IF, RC, patente), limite de crédit |
 | **Fournisseurs** | CRUD, recherche, contacts |
 | **Catalogue** | Catégories hiérarchiques, produits (SKU, code-barres, TVA, seuil de réapprovisionnement, stock initial) |
@@ -68,6 +68,7 @@ HTTP → Controller (mince) → FormRequest (validation) → Service (règles m�
 | **Devis** | Brouillon → envoyé → accepté/refusé → conversion en commande, validité automatique, expiration planifiée |
 | **Facturation** | Factures & avoirs, envoi, annulation, génération depuis une commande livrée |
 | **Paiements** | Encaissements clients et décaissements fournisseurs, partiels ou totaux, statuts automatiques, détection des retards |
+| **Journal d'activité** | Traçabilité des créations, modifications et suppressions : auteur, IP et champs modifiés |
 | **Tableau de bord** | CA du mois (+ croissance), encaissements, créances, retards, stock faible, valeur du stock, top produits, série 12 mois |
 
 ## Règles métier
@@ -156,7 +157,7 @@ cd backend && php artisan test
 Tests unitaires (logique pure, sans base de données) :
 
 - `LineTotalsTest` — arrondis des totaux de ligne, TVA, remises, document vide
-- `PermissionsTest` — unicité et nommage des 53 permissions du catalogue RBAC
+- `PermissionsTest` — unicité et nommage des 54 permissions du catalogue RBAC
 - `SalesOrderStatusTest`, `PurchaseOrderStatusTest`, `InvoiceStatusTest`,
   `InvoiceTypeTest`, `StockMovementTypeTest` — libellés et transitions de statut
 
@@ -201,7 +202,7 @@ Tests fonctionnels :
 │   │   ├── migrations/       # 10 migrations métier
 │   │   └── seeders/
 │   ├── routes/api.php
-│   └── tests/                # 148 tests (unit + feature)
+│   └── tests/                # 160 tests (unit + feature)
 ├── docker/                   # PHP-FPM, Nginx, php.ini
 ├── docker-compose.yml
 ├── docs/API.md
@@ -212,8 +213,7 @@ Tests fonctionnels :
 
 - [ ] Frontend Angular (dashboard, listes, formulaires, guards par permission)
 - [ ] Export PDF des factures / bons de livraison
-- [ ] Paiements fournisseurs (décaissements) et rapprochement
-- [ ] Devis → commande, avoirs générés depuis une facture
+- [ ] Rapprochement bancaire des décaissements
+- [ ] Avoirs générés depuis une facture
 - [ ] Notifications (email facture, alerte stock) via queue Redis
-- [ ] Journal d'audit (qui a modifié quoi)
 - [ ] Multi-société / multi-devise

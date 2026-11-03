@@ -367,7 +367,32 @@ automatiquement : `sent` → `partially_paid` → `paid`, ou `overdue` après é
 | GET | `/payments?direction=in&method=bank_transfer&from=&to=` |
 | GET | `/payments/{id}` |
 
-## 13. Administration
+## 13. Journal d'activité — `audit.view`
+
+`GET /activity-logs` — filtres `?subject_type=`, `?subject_id=`, `?event=`, `?user_id=`, `?from=`, `?to=`.
+
+```json
+{
+  "data": [
+    {
+      "id": 812,
+      "event": "updated",
+      "description": "Facture FAC-2026-0007 modifiée",
+      "subject_type": "App\\Models\\Invoice",
+      "subject_id": 7,
+      "changes": { "status": "partially_paid", "balance_due": "140.00" },
+      "ip_address": "10.0.0.4",
+      "user": { "id": 3, "name": "Karim Tazi" },
+      "created_at": "2026-11-03T09:12:44+01:00"
+    }
+  ]
+}
+```
+
+Chaque création, modification ou suppression sur les clients, fournisseurs, produits,
+commandes, devis, factures et paiements écrit une entrée. Les mouvements de stock ne
+sont pas journalisés ici : le journal de stock fait déjà office de piste d'audit.
+## 14. Administration
 
 | Méthode | Route | Permission |
 | --- | --- | --- |
@@ -387,7 +412,7 @@ de droits côté Angular :
 { "data": [ { "module": "clients", "permissions": [ { "id": 1, "name": "clients.view", "label": "Consulter les clients" } ] } ] }
 ```
 
-## 14. Rôles livrés
+## 15. Rôles livrés
 
 | Rôle | Portée |
 | --- | --- |
@@ -397,7 +422,7 @@ de droits côté Angular :
 | `stock_manager` | Catalogue, entrepôts, stock, réceptions |
 | `sales` | Clients, commandes de vente, livraisons, facturation |
 
-## 15. Tâches planifiées
+## 16. Tâches planifiées
 
 | Commande | Fréquence | Effet |
 | --- | --- | --- |

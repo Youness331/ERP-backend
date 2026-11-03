@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\ActivityLogController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\ClientController;
@@ -171,6 +172,8 @@ Route::prefix('v1')->group(function () {
 
         Route::get('payments', [PaymentController::class, 'index'])->middleware('permission:payments.view');
         Route::get('payments/{payment}', [PaymentController::class, 'show'])->middleware('permission:payments.view');
+
+        Route::get('activity-logs', [ActivityLogController::class, 'index'])->middleware('permission:audit.view');
 
         /*
         |--------------------------------------------------------------------
