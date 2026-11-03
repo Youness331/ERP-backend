@@ -269,7 +269,46 @@ draft ──confirm──▶ confirmed ──deliver──▶ partially_delivere
   └──── cancel ────────┴──▶ cancelled (réservations libérées)
 ```
 
-## 10. Facturation — `invoices.*`
+## 10. Devis — `quotes.*`
+
+| Méthode | Route | Permission |
+| --- | --- | --- |
+| GET | `/quotes` | `quotes.view` |
+| POST | `/quotes` | `quotes.create` |
+| GET | `/quotes/{id}` | `quotes.view` |
+| PUT/PATCH | `/quotes/{id}` | `quotes.update` |
+| DELETE | `/quotes/{id}` | `quotes.delete` |
+| POST | `/quotes/{id}/send` | `quotes.send` |
+| POST | `/quotes/{id}/accept` | `quotes.update` |
+| POST | `/quotes/{id}/reject` | `quotes.update` |
+| POST | `/quotes/{id}/convert` | `quotes.convert` |
+
+```json
+POST /quotes
+{
+  "client_id": 4,
+  "warehouse_id": 1,
+  "valid_until": "2026-12-15",
+  "lines": [
+    { "product_id": 7, "quantity": 10, "unit_price": 240 }
+  ]
+}
+```
+
+Référence `DEV-YYYY-NNNN`, `valid_until` à +30 jours par défaut.
+
+### Cycle de vie
+
+```
+draft ──send──▶ sent ──accept──▶ accepted ──convert──▶ converted (+ commande brouillon)
+                   └──reject──▶ rejected
+     (valid_until dépassée) ──▶ expired
+```
+
+- Modifiable uniquement au statut `draft`.
+- `convert` exige le statut `accepted` et crée une commande client **brouillon**, sans mouvement de stock.
+- Une seule conversion possible : un devis déjà converti renvoie `422`.
+## 11. Facturation — `invoices.*`
 
 | Méthode | Route | Permission |
 | --- | --- | --- |
@@ -310,14 +349,14 @@ POST /invoices/12/payments
 Un montant supérieur au solde dû est refusé (`422`). Les statuts évoluent
 automatiquement : `sent` → `partially_paid` → `paid`, ou `overdue` après échéance.
 
-## 11. Paiements — `payments.view`
+## 12. Paiements — `payments.view`
 
 | Méthode | Route |
 | --- | --- |
 | GET | `/payments?direction=in&method=bank_transfer&from=&to=` |
 | GET | `/payments/{id}` |
 
-## 12. Administration
+## 13. Administration
 
 | Méthode | Route | Permission |
 | --- | --- | --- |
@@ -337,7 +376,7 @@ de droits côté Angular :
 { "data": [ { "module": "clients", "permissions": [ { "id": 1, "name": "clients.view", "label": "Consulter les clients" } ] } ] }
 ```
 
-## 13. Rôles livrés
+## 14. Rôles livrés
 
 | Rôle | Portée |
 | --- | --- |
@@ -347,8 +386,9 @@ de droits côté Angular :
 | `stock_manager` | Catalogue, entrepôts, stock, réceptions |
 | `sales` | Clients, commandes de vente, livraisons, facturation |
 
-## 14. Tâches planifiées
+## 15. Tâches planifiées
 
 | Commande | Fréquence | Effet |
 | --- | --- | --- |
 | `php artisan erp:refresh-overdue-invoices` | Quotidien 01:00 | Passe en `overdue` les factures impayées échues |
+| `php artisan erp:expire-quotes` | Quotidien 01:15 | Passe en `expired` les devis dont la validité est dépassée |
