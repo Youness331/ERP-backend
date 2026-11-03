@@ -34,7 +34,7 @@ stock, achats, ventes, facturation, encaissements) pour une PME marocaine :
 | Authentification | Laravel Sanctum (tokens Bearer) |
 | Serveur web | Nginx + PHP-FPM |
 | Conteneurisation | Docker Compose |
-| Tests | PHPUnit 11 (188 tests, 727 assertions) |
+| Tests | PHPUnit 11 (193 tests, 736 assertions) |
 | Style | Laravel Pint (PSR-12) |
 
 ## Architecture
@@ -71,6 +71,7 @@ HTTP → Controller (mince) → FormRequest (validation) → Service (règles m�
 | **Journal d'activité** | Traçabilité des créations, modifications et suppressions : auteur, IP et champs modifiés |
 | **Rapports** | Ventes par période, top produits/clients, dépenses fournisseurs, valorisation du stock, balance âgée |
 | **Rapprochement bancaire** | Saisie des lignes de relevé, rapprochement automatique par montant/sens, suggestions, annulation |
+| **Notifications** | Envoi de facture par email (PDF, file d'attente) et alerte quotidienne de stock faible |
 | **Tableau de bord** | CA du mois (+ croissance), encaissements, créances, retards, stock faible, valeur du stock, top produits, série 12 mois |
 
 ## Règles métier
@@ -204,7 +205,7 @@ Tests fonctionnels :
 │   │   ├── migrations/       # 10 migrations métier
 │   │   └── seeders/
 │   ├── routes/api.php
-│   └── tests/                # 188 tests (unit + feature)
+│   └── tests/                # 193 tests (unit + feature)
 ├── docker/                   # PHP-FPM, Nginx, php.ini
 ├── docker-compose.yml
 ├── docs/API.md
@@ -214,5 +215,4 @@ Tests fonctionnels :
 ## Prochaines étapes
 
 - [ ] Frontend Angular (dashboard, listes, formulaires, guards par permission)
-- [ ] Notifications (email facture, alerte stock) via queue Redis
 - [ ] Multi-société / multi-devise

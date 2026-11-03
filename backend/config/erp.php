@@ -38,4 +38,9 @@ return [
     'invoice' => [
         'due_days' => (int) env('ERP_INVOICE_DUE_DAYS', 30),
     ],
+
+    'alerts' => [
+        // Recipient of the scheduled stock alert email.
+        'email' => env('ERP_ALERT_EMAIL', env('ERP_COMPANY_EMAIL', 'contact@atlas-operations.ma')),
+    ],
 ];

@@ -173,6 +173,7 @@ Route::prefix('v1')->group(function () {
             Route::post('{invoice}/payments', [InvoiceController::class, 'storePayment'])->middleware('permission:payments.create');
             Route::get('{invoice}/pdf', [InvoiceController::class, 'pdf'])->middleware('permission:invoices.view');
             Route::post('{invoice}/credit-note', [InvoiceController::class, 'creditNote'])->middleware('permission:invoices.create');
+            Route::post('{invoice}/email', [InvoiceController::class, 'email'])->middleware('permission:invoices.send');
         });
 
         Route::get('payments', [PaymentController::class, 'index'])->middleware('permission:payments.view');

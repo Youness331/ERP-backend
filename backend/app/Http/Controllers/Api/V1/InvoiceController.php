@@ -12,9 +12,11 @@ use App\Http\Requests\UpdateInvoiceRequest;
 use App\Http\Resources\InvoiceResource;
 use App\Http\Resources\PaymentResource;
 use App\Models\Invoice;
+use App\Jobs\SendInvoiceEmail;
 use App\Services\InvoiceService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 
@@ -128,5 +130,21 @@ class InvoiceController extends Controller
         );
 
         return new InvoiceResource($credit);
+    }
+
+    /**
+     * Queues the invoice email with the PDF attached.
+     */
+    public function email(Invoice $invoice): JsonResponse
+    {
+        $invoice->loadMissing('client');
+
+        if (blank($invoice->client?->email)) {
+            throw new BusinessException('Ce client n\'a pas d\'adresse email renseignée.');
+        }
+
+        SendInvoiceEmail::dispatch($invoice->id);
+
+        return response()->json(['message' => 'Facture mise en file d\'envoi.'], 202);
     }
 }
