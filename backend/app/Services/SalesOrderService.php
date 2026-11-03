@@ -9,6 +9,7 @@ use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\SalesOrder;
 use App\Models\User;
+use App\Support\LineItems;
 use App\Support\LineTotals;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -205,25 +206,7 @@ class SalesOrderService
      */
     private function prepareLines(array $lines): array
     {
-        return array_values(array_map(function (array $line) {
-            /** @var Product $product */
-            $product = Product::query()->findOrFail($line['product_id']);
-
-            $quantity = (float) $line['quantity'];
-            $unitPrice = (float) ($line['unit_price'] ?? $product->sale_price);
-            $discount = (float) ($line['discount'] ?? 0);
-            $taxRate = (float) ($line['tax_rate'] ?? $product->tax_rate);
-
-            return [
-                'product_id' => $product->id,
-                'description' => $line['description'] ?? $product->name,
-                'quantity' => $quantity,
-                'unit_price' => $unitPrice,
-                'discount' => $discount,
-                'tax_rate' => $taxRate,
-                'line_total' => LineTotals::lineTotal($quantity, $unitPrice, $discount),
-            ];
-        }, $lines));
+        return LineItems::prepare($lines, fn (Product $product) => (float) $product->sale_price);
     }
 
     /**
