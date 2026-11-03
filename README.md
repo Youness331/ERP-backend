@@ -34,7 +34,7 @@ stock, achats, ventes, facturation, encaissements) pour une PME marocaine :
 | Authentification | Laravel Sanctum (tokens Bearer) |
 | Serveur web | Nginx + PHP-FPM |
 | Conteneurisation | Docker Compose |
-| Tests | PHPUnit 11 (41 tests, 183 assertions) |
+| Tests | PHPUnit 11 (138 tests, 494 assertions) |
 | Style | Laravel Pint (PSR-12) |
 
 ## Architecture
@@ -152,12 +152,21 @@ des factures (payées, partielles, en retard) et leurs encaissements.
 cd backend && php artisan test
 ```
 
-Couverture fonctionnelle :
+Tests unitaires (logique pure, sans base de données) :
+
+- `LineTotalsTest` — arrondis des totaux de ligne, TVA, remises, document vide
+- `PermissionsTest` — unicité et nommage des 47 permissions du catalogue RBAC
+- `SalesOrderStatusTest`, `PurchaseOrderStatusTest`, `InvoiceStatusTest`,
+  `InvoiceTypeTest`, `StockMovementTypeTest` — libellés et transitions de statut
+
+Tests fonctionnels :
 
 - `AuthenticationTest` — login, token, compte désactivé, profil, logout
 - `AuthorizationTest` — permissions par action, bypass admin, compte désactivé
 - `ClientApiTest` — pagination, recherche, validation, suppression protégée
 - `StockTest` — entrées/sorties/ajustements, stock insuffisant, réservations
+- `StockServiceTest` — réceptions, sorties, réservations, inventaire, journal
+- `ReferenceGeneratorTest` — séquences par type, par année, sans collision
 - `SalesOrderFlowTest` — totaux, réservation, livraison, facturation, paiements
 - `PurchaseOrderFlowTest` — réception totale/partielle, plafonnement, coût moyen
 - `DashboardTest` — payload KPI, commande de détection des retards
@@ -191,7 +200,7 @@ Couverture fonctionnelle :
 │   │   ├── migrations/       # 10 migrations métier
 │   │   └── seeders/
 │   ├── routes/api.php
-│   └── tests/Feature/        # 41 tests
+│   └── tests/                # 138 tests (unit + feature)
 ├── docker/                   # PHP-FPM, Nginx, php.ini
 ├── docker-compose.yml
 ├── docs/API.md
