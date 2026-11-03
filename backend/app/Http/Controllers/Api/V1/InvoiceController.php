@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Exceptions\BusinessException;
 use App\Http\Controllers\Concerns\Paginates;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreCreditNoteRequest;
 use App\Http\Requests\StoreInvoiceRequest;
 use App\Http\Requests\StorePaymentRequest;
 use App\Http\Requests\UpdateInvoiceRequest;
@@ -113,5 +114,19 @@ class InvoiceController extends Controller
         ])->setPaper('a4');
 
         return $pdf->download($invoice->reference.'.pdf');
+    }
+
+    /**
+     * Issues a credit note against the invoice.
+     */
+    public function creditNote(StoreCreditNoteRequest $request, Invoice $invoice): InvoiceResource
+    {
+        $credit = $this->invoices->creditNoteFrom(
+            $invoice,
+            $request->validated('lines'),
+            $request->user(),
+        );
+
+        return new InvoiceResource($credit);
     }
 }
