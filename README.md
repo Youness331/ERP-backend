@@ -157,6 +157,9 @@ des factures (payées, partielles, en retard) et leurs encaissements.
 cd backend && php artisan test
 ```
 
+GitHub Actions runs the backend test suite and Laravel Pint style check on every
+push and pull request.
+
 Tests unitaires (logique pure, sans base de données) :
 
 - `LineTotalsTest` — arrondis des totaux de ligne, TVA, remises, document vide
