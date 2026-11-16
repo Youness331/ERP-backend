@@ -1,41 +1,18 @@
-# ERP Opérations — Backend (Laravel 12)
+# Backend application
 
-API REST de la plateforme ERP de gestion des opérations.
-Documentation complète : [../README.md](../README.md) · [../docs/API.md](../docs/API.md).
+This folder contains the Laravel API used by the ERP frontend. The frontend is
+maintained in the separate
+[ERP-frontend repository](https://github.com/Youness331/ERP-frontend).
 
-## Démarrage
-
-```bash
-composer install
-cp .env.example .env
-php artisan key:generate
-php artisan migrate --seed
-php artisan serve
-```
-
-Avec Docker (depuis la racine du dépôt) :
+To start the API and its services, run these commands from the
+[repository root](../README.md):
 
 ```bash
 docker compose up -d --build
 docker compose exec app composer install
+docker compose exec app php artisan key:generate
 docker compose exec app php artisan migrate --seed
 ```
 
-## Tests
-
-```bash
-php artisan test
-```
-
-## Organisation
-
-| Dossier | Rôle |
-| --- | --- |
-| `app/Http/Controllers/Api/V1` | Points d'entrée REST (contrôleurs minces) |
-| `app/Http/Requests` | Validation des entrées |
-| `app/Http/Resources` | Contrats de sortie JSON |
-| `app/Services` | Règles métier transactionnelles (stock, commandes, factures) |
-| `app/Enums` | Statuts typés et libellés français |
-| `app/Support` | `LineTotals` (TVA/totaux), `Permissions` (catalogue RBAC) |
-| `database/migrations` | Schéma métier (10 migrations) |
-| `tests/Feature` | Tests fonctionnels des parcours critiques |
+The API runs at `http://localhost:8000/api/v1`. Run backend tests with
+`docker compose exec app php artisan test`.
